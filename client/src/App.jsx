@@ -6,11 +6,13 @@ import { RequireAuth, RequireRoles } from './routes/guards';
 import AppShell from './layouts/AppShell';
 import RouteFallback from './components/RouteFallback';
 
-// LoginPage stays eager: it is the entry point for every unauthenticated visit,
-// so lazy-loading it would only add a round trip to the most common first paint.
+// LoginPage stays eager: it is the entry point for every unauthenticated visit
 import LoginPage from './pages/LoginPage';
 
-// The rest split per route. Nobody loads the users table on their way to the login form.
+// Sponsorships Dashboard Component
+const SponsorshipsDashboard = lazy(() => import('./components/SponsorshipsDashboard'));
+
+// Lazy-loaded pages
 const ChangePasswordPage = lazy(() => import('./pages/ChangePasswordPage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
@@ -28,9 +30,6 @@ export default function App() {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  // Mount the 401 interceptor once so expired/invalid sessions clear and
-  // redirect to login without loops.  The returned eject function prevents
-  // interceptor stacking when navigate/logout change identity.
   useEffect(() => {
     const eject = mount401Interceptor(navigate, () => logout());
     return eject;
@@ -50,10 +49,7 @@ export default function App() {
         />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-        {/* A layout route: AppShell mounts ONCE and stays mounted while the child route
-            changes underneath it. Wrapping each page in its own <AppShell> unmounted and
-            remounted the whole shell on every navigation, which reset its local state —
-            the sidebar silently un-collapsed itself — and re-ran the entrance animation. */}
+        {/* Protected App Routes */}
         <Route
           element={
             <RequireAuth>
@@ -65,6 +61,10 @@ export default function App() {
         >
           <Route path="/app" element={<DashboardPage />} />
           <Route path="/app/profile" element={<ProfilePage />} />
+          
+          {/* مسار لوحة الكفالات الجديد */}
+          <Route path="/app/sponsorships" element={<SponsorshipsDashboard />} />
+
           <Route
             path="/app/users"
             element={

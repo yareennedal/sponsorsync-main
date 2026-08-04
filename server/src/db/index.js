@@ -18,3 +18,5 @@ export const sequelize = url
       pool: { max: 5, min: 1, idle: 10000 },
     })
   : null;
+
+export default sequelize;

@@ -13,6 +13,8 @@ import { authRouter } from './routes/authRoutes.js';
 import { userRouter } from './routes/userRoutes.js';
 import { eventRouter } from './routes/eventRoutes.js';
 import { companyRouter } from './routes/companyRoutes.js';
+import sponsorshipRouter from './routes/sponsorshipRoutes.js';
+import './db/sponsorshipAssociations.js';
 
 export function createApp() {
   const app = express();
@@ -47,6 +49,9 @@ export function createApp() {
   app.use('/api/users', userRouter);
   app.use('/api/events', eventRouter);
   app.use('/api/companies', companyRouter);
+  
+  // ✅ تم إضافة مسار الكفالات هنا مع الحفاظ على النمط المتبع للمسارات
+  app.use('/api/sponsorships', sponsorshipRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
