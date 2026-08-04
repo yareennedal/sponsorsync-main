@@ -1,0 +1,14 @@
+node_modules
+client/dist
+dist
+coverage
+**/package-lock.json
+.agents
+.remember
+
+# Generated from AGENTS.md by `npm run sync:agents`. Prettier rewriting them fights the
+# generator: prettier uses CRLF on a Windows checkout, the generator writes LF, and the two
+# take turns undoing each other. Edit AGENTS.md — which prettier does format — instead.
+CLAUDE.md
+GEMINI.md
+.github/copilot-instructions.md

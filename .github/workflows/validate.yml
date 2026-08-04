@@ -1,0 +1,75 @@
+name: validate
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# Every run calls resetDb(), which TRUNCATEs the shared Supabase test database. Without this
+# group, two pushes minutes apart truncate each other mid-suite and produce red builds that
+# nobody can reproduce. Serialize instead — and never cancel, because a cancelled run leaves
+# the shared database half-truncated for whoever is next.
+concurrency:
+  group: sponsorsync-test-db
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check required secrets
+        # A missing JWT_SECRET used to surface as a wall of "expected 500 to be 200" across a
+        # dozen tests, which reads as broken auth logic rather than a missing secret.
+        env:
+          DATABASE_URL_TEST: ${{ secrets.SUPABASE_TEST_DB_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          missing=""
+          [ -n "$DATABASE_URL_TEST" ] || missing="$missing SUPABASE_TEST_DB_URL"
+          [ -n "$JWT_SECRET" ] || missing="$missing JWT_SECRET"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing required repository secret(s):$missing — see docs/local-setup.md"
+            exit 1
+          fi
+          echo "Required secrets are present."
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: '.nvmrc'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format check
+        run: npm run format:check
+
+      # CLAUDE.md, GEMINI.md and .github/copilot-instructions.md are generated from AGENTS.md.
+      # They drifted once until copilot-instructions.md said "Active plan: Plan 1" and "never
+      # commit .env" — both false — so a teammate's AI would have been told the opposite of
+      # reality. Fail the build rather than let that happen silently again.
+      - name: Agent instruction files in sync
+        run: npm run sync:agents:check
+
+      - name: Build client
+        run: npm run build
+
+      - name: Tests (DB-dependent)
+        # Runs the server test suite against the test Supabase database using
+        # secrets. Client tests (no DB) run as part of this command too.
+        env:
+          DATABASE_URL_TEST: ${{ secrets.SUPABASE_TEST_DB_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: npm run test
+
+      - name: Audit production dependencies
+        # Advisory: dev-tooling advisories (vitest/vite/eslint) are noise here since they never
+        # ship. Only production deps are checked, and a finding reports without failing the run.
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high

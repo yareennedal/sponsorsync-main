@@ -1,0 +1,40 @@
+{
+  "name": "sponsorsync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "concurrently -n client,server -c blue,green \"npm:dev:client\" \"npm:dev:server\"",
+    "dev:client": "npm --workspace client run dev",
+    "dev:server": "npm --workspace server run dev",
+    "build": "npm --workspace client run build",
+    "lint": "eslint .",
+    "format:check": "prettier --check .",
+    "test": "npm --workspace server run test && npm --workspace client run test",
+    "test:server": "npm --workspace server run test",
+    "test:client": "npm --workspace client run test",
+    "db:migrate": "node server/src/scripts/db.js migrate",
+    "db:migrate:undo": "node server/src/scripts/db.js undo",
+    "db:seed": "node server/src/scripts/db.js seed",
+    "sync:agents": "node scripts/sync-agent-docs.mjs",
+    "sync:agents:check": "node scripts/sync-agent-docs.mjs --check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-react": "^7.37.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.0"
+  }
+}

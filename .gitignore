@@ -1,0 +1,46 @@
+# dependencies
+node_modules/
+
+# environment files
+#
+# DELIBERATE: server/.env and client/.env ARE committed. This is a private repo and a
+# four-person college project, and the alternative was three teammates blocked on setup.
+# Decided 2026-07-25 by the project owner, with eyes open.
+#
+# THE REPOSITORY CANNOT BE MADE PUBLIC AS-IS. Real credentials are in the history, so
+# flipping visibility leaks them even if the files are deleted first. Before open-sourcing:
+# rotate the Supabase database passwords and JWT_SECRET, re-ignore these two files, and
+# only then change visibility. See README.md.
+#
+# They are un-ignored rather than force-added on purpose: a force-added file stays ignored,
+# so edits never appear in `git status` and a rotated password would silently reach nobody.
+.env*
+!.env.example
+!server/.env
+!client/.env
+
+# build output
+client/dist/
+dist/
+build/
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# test coverage
+coverage/
+
+# editor / OS
+.claude/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# uploads / generated runtime artifacts
+uploads/
+tmp/
