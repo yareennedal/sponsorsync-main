@@ -5,9 +5,22 @@ import { mount401Interceptor } from './api/interceptor';
 import { RequireAuth, RequireRoles } from './routes/guards';
 import AppShell from './layouts/AppShell';
 import RouteFallback from './components/RouteFallback';
+import { useTranslation } from 'react-i18next';
 
 // LoginPage stays eager: it is the entry point for every unauthenticated visit
 import LoginPage from './pages/LoginPage';
+
+// Language wrapper component to handle RTL/LTR and translation side-effects
+function LanguageProviderWrapper({ children }) {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+    document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+  }, [i18n.language]);
+
+  return children;
+}
 
 // Sponsorships Dashboard Component
 const SponsorshipsDashboard = lazy(() => import('./components/SponsorshipsDashboard'));
@@ -36,84 +49,86 @@ export default function App() {
   }, [navigate, logout]);
 
   return (
-    <Suspense fallback={<RouteFallback />}>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="/change-password"
-          element={
-            <RequireAuth>
-              <ChangePasswordPage />
-            </RequireAuth>
-          }
-        />
-        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+    <LanguageProviderWrapper>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/change-password"
+            element={
+              <RequireAuth>
+                <ChangePasswordPage />
+              </RequireAuth>
+            }
+          />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-        {/* Protected App Routes */}
-        <Route
-          element={
-            <RequireAuth>
-              <AppShell>
-                <Outlet />
-              </AppShell>
-            </RequireAuth>
-          }
-        >
-          <Route path="/app" element={<DashboardPage />} />
-          <Route path="/app/profile" element={<ProfilePage />} />
-          
-          {/* مسار لوحة الكفالات الجديد */}
-          <Route path="/app/sponsorships" element={<SponsorshipsDashboard />} />
+          {/* Protected App Routes */}
+          <Route
+            element={
+              <RequireAuth>
+                <AppShell>
+                  <Outlet />
+                </AppShell>
+              </RequireAuth>
+            }
+          >
+            <Route path="/app" element={<DashboardPage />} />
+            <Route path="/app/profile" element={<ProfilePage />} />
+            
+            {/* مسار لوحة الكفالات الجديد */}
+            <Route path="/app/sponsorships" element={<SponsorshipsDashboard />} />
 
-          <Route
-            path="/app/users"
-            element={
-              <RequireRoles roles={['ADMIN']}>
-                <UsersPage />
-              </RequireRoles>
-            }
-          />
-          <Route path="/app/events" element={<EventsPage />} />
-          <Route
-            path="/app/events/new"
-            element={
-              <RequireRoles roles={['ADMIN', 'LEADER']}>
-                <EventFormPage mode="create" />
-              </RequireRoles>
-            }
-          />
-          <Route path="/app/events/:eventId" element={<EventDetailPage />} />
-          <Route
-            path="/app/events/:eventId/edit"
-            element={
-              <RequireRoles roles={['ADMIN', 'LEADER']}>
-                <EventFormPage mode="edit" />
-              </RequireRoles>
-            }
-          />
-          <Route path="/app/events/:eventId/packages" element={<EventDetailPage />} />
-          <Route path="/app/companies" element={<CompaniesPage />} />
-          <Route
-            path="/app/companies/new"
-            element={
-              <RequireRoles roles={['ADMIN', 'LEADER']}>
-                <CompanyFormPage mode="create" />
-              </RequireRoles>
-            }
-          />
-          <Route path="/app/companies/:companyId" element={<CompanyDetailPage />} />
-          <Route
-            path="/app/companies/:companyId/edit"
-            element={
-              <RequireRoles roles={['ADMIN', 'LEADER']}>
-                <CompanyFormPage mode="edit" />
-              </RequireRoles>
-            }
-          />
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-        <Route path="/" element={<Navigate to="/app" replace />} />
-      </Routes>
-    </Suspense>
+            <Route
+              path="/app/users"
+              element={
+                <RequireRoles roles={['ADMIN']}>
+                  <UsersPage />
+                </RequireRoles>
+              }
+            />
+            <Route path="/app/events" element={<EventsPage />} />
+            <Route
+              path="/app/events/new"
+              element={
+                <RequireRoles roles={['ADMIN', 'LEADER']}>
+                  <EventFormPage mode="create" />
+                </RequireRoles>
+              }
+            />
+            <Route path="/app/events/:eventId" element={<EventDetailPage />} />
+            <Route
+              path="/app/events/:eventId/edit"
+              element={
+                <RequireRoles roles={['ADMIN', 'LEADER']}>
+                  <EventFormPage mode="edit" />
+                </RequireRoles>
+              }
+            />
+            <Route path="/app/events/:eventId/packages" element={<EventDetailPage />} />
+            <Route path="/app/companies" element={<CompaniesPage />} />
+            <Route
+              path="/app/companies/new"
+              element={
+                <RequireRoles roles={['ADMIN', 'LEADER']}>
+                  <CompanyFormPage mode="create" />
+                </RequireRoles>
+              }
+            />
+            <Route path="/app/companies/:companyId" element={<CompanyDetailPage />} />
+            <Route
+              path="/app/companies/:companyId/edit"
+              element={
+                <RequireRoles roles={['ADMIN', 'LEADER']}>
+                  <CompanyFormPage mode="edit" />
+                </RequireRoles>
+              }
+            />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+          <Route path="/" element={<Navigate to="/app" replace />} />
+        </Routes>
+      </Suspense>
+    </LanguageProviderWrapper>
   );
 }

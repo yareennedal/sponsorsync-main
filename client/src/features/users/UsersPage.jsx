@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
@@ -42,6 +43,7 @@ import StatusChip from '../../components/StatusChip';
 const emptyForm = { fullName: '', email: '', role: 'MEMBER', temporaryPassword: '' };
 
 export default function UsersPage() {
+  const { t } = useTranslation();
   const [rows, setRows] = useState([]);
   const [meta, setMeta] = useState({ page: 1, pageSize: 20, total: 0, totalPages: 1 });
   const [search, setSearch] = useState('');

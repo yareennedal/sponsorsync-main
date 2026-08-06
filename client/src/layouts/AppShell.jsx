@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -40,7 +41,6 @@ const NAV_GROUPS = [
   {
     header: 'الرئيسية',
     items: [
-      // `end` so /app does not stay active while on /app/users.
       { label: 'لوحة التحكم', path: '/app', end: true, icon: <DashboardIcon fontSize="small" /> },
       { label: 'الملف الشخصي', path: '/app/profile', icon: <PersonIcon fontSize="small" /> },
     ],
@@ -86,8 +86,6 @@ function breadcrumbFor(pathname) {
   return 'الرئيسية';
 }
 
-// Defined at module level, not inside AppShell — a component declared during render
-// is remounted on every parent render, discarding its subtree state.
 function SidebarNav({ role, collapsed, onNavigate }) {
   return (
     <Box
@@ -98,9 +96,6 @@ function SidebarNav({ role, collapsed, onNavigate }) {
         display: 'flex',
         flexDirection: 'column',
         bgcolor: 'background.paper',
-        // Logical, not physical. stylis-plugin-rtl rewrites `borderLeft` to
-        // `borderRight`; `borderInlineEnd` is already direction-aware, so it is
-        // immune to the flip and means what it says: the edge facing the content.
         borderInlineEnd: '1px solid',
         borderColor: 'divider',
         overflowX: 'hidden',
@@ -133,8 +128,6 @@ function SidebarNav({ role, collapsed, onNavigate }) {
 
               <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
                 {items.map((item) => {
-                  // NavLink renders an <a>, applies `.active`, and sets aria-current="page"
-                  // itself — so the active state needs no location comparison and no state.
                   const button = (
                     <ListItemButton
                       component={NavLink}
@@ -198,6 +191,7 @@ export default function AppShell({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { i18n } = useTranslation();
 
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -205,6 +199,11 @@ export default function AppShell({ children }) {
 
   const drawerWidth = collapsed ? DRAWER_WIDTH_COLLAPSED : DRAWER_WIDTH_EXPANDED;
   const breadcrumb = breadcrumbFor(location.pathname);
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+    i18n.changeLanguage(newLang);
+  };
 
   const handleLogout = async () => {
     setAnchorEl(null);
@@ -257,7 +256,6 @@ export default function AppShell({ children }) {
             SponsorSync
           </Typography>
 
-          {/* Hidden on narrow screens — the page heading already says where you are. */}
           <Stack
             direction="row"
             alignItems="center"
@@ -277,9 +275,15 @@ export default function AppShell({ children }) {
           </Stack>
         </Stack>
 
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
-          {/* Same variant as the role chip in the users table — one component
-              vocabulary, per the Color/Shape Consistency Lock. */}
+        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ flexShrink: 0 }}>
+          {/* زر تبديل اللغة */}
+          <button 
+            onClick={toggleLanguage} 
+            className="px-3 py-1 text-sm font-medium bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition"
+          >
+            {i18n.language === 'ar' ? 'English' : 'العربية'}
+          </button>
+
           <Chip
             label={ROLE_LABELS[user.role]}
             size="small"
@@ -359,7 +363,6 @@ export default function AppShell({ children }) {
         </Stack>
       </Box>
 
-      {/* Desktop: permanent rail pinned to the right (RTL inline-start). */}
       <Box
         sx={{
           width: { md: drawerWidth },
@@ -372,8 +375,6 @@ export default function AppShell({ children }) {
           sx={{
             position: 'fixed',
             top: HEADER_HEIGHT,
-            // Inline-start = the right edge in RTL. Written physically as `right: 0`
-            // this gets flipped to the left by stylis-plugin-rtl.
             insetInlineStart: 0,
             bottom: 0,
             width: drawerWidth,
@@ -384,14 +385,7 @@ export default function AppShell({ children }) {
         </Box>
       </Box>
 
-      {/* Mobile: MUI Drawer supplies the focus trap, Escape handling, focus restore,
-          scroll lock, and aria-modal that the previous hand-rolled version lacked. */}
       <Drawer
-        // Renders on the right edge, but NOT because MUI flips the anchor — it does not.
-        // MUI emits a physical `left: 0` for anchor="left", and stylis-plugin-rtl rewrites
-        // that to `right: 0` in the Emotion cache. Do not "correct" this to "right": the
-        // plugin would flip it to the left edge. (Two commits in this repo's history were
-        // spent fighting exactly that.)
         anchor="left"
         variant="temporary"
         open={mobileOpen}
@@ -402,9 +396,6 @@ export default function AppShell({ children }) {
           '& .MuiDrawer-paper': { width: DRAWER_WIDTH_EXPANDED, boxSizing: 'border-box' },
         }}
       >
-        {/* The header sits at zIndex drawer+1 and is opaque, so without this offset the
-            top HEADER_HEIGHT of the nav renders behind it and taps there hit the header
-            instead of the first link. */}
         <Box sx={{ pt: `${HEADER_HEIGHT}px`, height: '100%' }}>
           <SidebarNav role={user.role} collapsed={false} onNavigate={() => setMobileOpen(false)} />
         </Box>

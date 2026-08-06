@@ -7,8 +7,6 @@ import {
   addInteraction,
   addFollowup,
 } from '../controllers/sponsorshipController.js';
-
-// ✅ تم تعديل المسار ليتطابق مع مجلد مشروعك (middleware/authenticate.js)
 import { authenticate } from '../middleware/authenticate.js'; 
 
 const router = Router();
@@ -23,4 +21,4 @@ router.patch('/cases/:id/status', updateCaseStatus);
 router.post('/cases/:id/interactions', addInteraction);
 router.post('/cases/:id/followups', addFollowup);
 
-export default router;
+export default router; // <-- التصدير الصحيح يكون هنا فقط في ملف الـ Routes

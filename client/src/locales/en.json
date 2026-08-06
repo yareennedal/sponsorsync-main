@@ -1,0 +1,18 @@
+{
+  "users": {
+    "title": "User Management",
+    "subtitle": "Manage SponsorSync team member accounts and granted permissions.",
+    "addUser": "+ Add New User",
+    "searchPlaceholder": "Search by name or email",
+    "status": "Status",
+    "role": "Role",
+    "table": {
+      "user": "User",
+      "email": "Email",
+      "assignedRole": "Assigned Role",
+      "accountStatus": "Account Status",
+      "actions": "Actions"
+    },
+    "active": "Active"
+  }
+}

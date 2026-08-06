@@ -57,4 +57,8 @@ export function createApp() {
   app.use(errorHandler);
 
   return app;
+  // مثال على المكان المناسب في server/src/app.js
+app.get('/', (req, res) => {
+  res.json({ message: 'Welcome to SponsorSync API' });
+});
 }
